@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebGL Terrain Map</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128/examples/js/controls/OrbitControls.js"></script>
+    <style>
+        body { margin: 0; overflow: hidden; background: black; }
+        canvas { display: block; }
+    </style>
+</head>
+<body>
+
+<script>
+    let scene, camera, renderer, terrain, controls;
+
+    const WIDTH = window.innerWidth;
+    const HEIGHT = window.innerHeight;
+
+    function init() {
+        scene = new THREE.Scene();
+        camera = new THREE.PerspectiveCamera(75, WIDTH / HEIGHT, 0.1, 500);
+        camera.position.set(0, 40, 100); // Adjust camera for better view
+
+        renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(WIDTH, HEIGHT);
+        document.body.appendChild(renderer.domElement);
+
+        controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true; // Smooth camera movement
+
+        window.addEventListener('resize', onWindowResize);
+
+        loadTexturesAndCreateTerrain();
+    }
+
+    function loadTexturesAndCreateTerrain() {
+        const loader = new THREE.TextureLoader();
+
+        loader.load('depth_z1.jpg', heightTexture => {
+            loader.load('ocean_z1.jpg', oceanMask => {
+                loader.load('terrain_z1.jpg', terrainTexture => {
+                    createTerrain(heightTexture, oceanMask, terrainTexture);
+                });
+            });
+        });
+    }
+
+    function createTerrain(heightTexture, oceanMask, terrainTexture) {
+        const geometry = new THREE.PlaneGeometry(100, 100, 200, 200);
+        geometry.rotateX(-Math.PI / 2);
+
+        const material = new THREE.MeshStandardMaterial({
+            map: terrainTexture,
+            displacementMap: heightTexture,
+            displacementScale: 15, // Controls terrain height
+            bumpMap: heightTexture,
+            bumpScale: 3,
+        });
+
+        terrain = new THREE.Mesh(geometry, material);
+        scene.add(terrain);
+
+        // Lighting
+        const light = new THREE.DirectionalLight(0xffffff, 1);
+        light.position.set(50, 100, 50);
+        scene.add(light);
+
+        const ambientLight = new THREE.AmbientLight(0x404040, 2); // Soft background light
+        scene.add(ambientLight);
+
+        animate();
+    }
+
+    function animate() {
+        requestAnimationFrame(animate);
+        controls.update();
+        renderer.render(scene, camera);
+    }
+
+    function onWindowResize() {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+    init();
+</script>
+
+</body>
+</html>
