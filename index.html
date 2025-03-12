@@ -39,9 +39,9 @@
     function loadTexturesAndCreateTerrain() {
         const loader = new THREE.TextureLoader();
 
-        loader.load('depth_z1.jpg', heightTexture => {
-            loader.load('ocean_z1.jpg', oceanMask => {
-                loader.load('terrain_z1.jpg', terrainTexture => {
+        loader.load('heightmap.png', heightTexture => {
+            loader.load('ocean.png', oceanMask => {
+                loader.load('terrain.png', terrainTexture => {
                     // Apply linear filter for smooth zoom
                     heightTexture.minFilter = THREE.LinearFilter;
                     heightTexture.magFilter = THREE.LinearFilter;
