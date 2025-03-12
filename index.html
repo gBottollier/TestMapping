@@ -42,6 +42,12 @@
         loader.load('depth_z1.jpg', heightTexture => {
             loader.load('ocean_z1.jpg', oceanMask => {
                 loader.load('terrain_z1.jpg', terrainTexture => {
+                    // Apply linear filter for smooth zoom
+                    heightTexture.minFilter = THREE.LinearFilter;
+                    heightTexture.magFilter = THREE.LinearFilter;
+                    terrainTexture.minFilter = THREE.LinearFilter;
+                    terrainTexture.magFilter = THREE.LinearFilter;
+
                     createTerrain(heightTexture, oceanMask, terrainTexture);
                 });
             });
@@ -49,15 +55,16 @@
     }
 
     function createTerrain(heightTexture, oceanMask, terrainTexture) {
-        const geometry = new THREE.PlaneGeometry(100, 100, 200, 200);
+        // Increased segmentation for smoother terrain
+        const geometry = new THREE.PlaneGeometry(100, 100, 400, 400);  // Increased segments
         geometry.rotateX(-Math.PI / 2);
 
         const material = new THREE.MeshStandardMaterial({
             map: terrainTexture,
             displacementMap: heightTexture,
-            displacementScale: 15, // Controls terrain height
+            displacementScale: 10,  // Adjusted displacement scale
             bumpMap: heightTexture,
-            bumpScale: 3,
+            bumpScale: 2,  // Adjusted bump scale
         });
 
         terrain = new THREE.Mesh(geometry, material);
